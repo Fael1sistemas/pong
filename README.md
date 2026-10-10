@@ -1,28 +1,27 @@
-# PONG
+# PONG (Jogo Local PvP & PvC)
 
-This is a recreation of the classic pong video game. Implemented in the C
-programming language, using SDL library to display graphics on the screen.
+Jogo Pong clássico recriado em linguagem C utilizando a biblioteca SDL2.
 
-To compile you need to have SDL installed on your system and the header files
-available to you operating systems PATH environment variable
+## Modos de Jogo
+* **1 PLAYER (VS CPU):** Jogador vs Computador.
+* **2 PLAYERS (P1 VS P2):** Jogador 1 vs Jogador 2 local no mesmo teclado.
 
-	gcc pong.c `sdl2-config --cflags --libs` -o pong
+## Controles
+### Menu Inicial:
+* **Setas Cima / Baixo** ou Teclas **1** e **2**: Selecionar o Modo de Jogo
+* **Espaço** ou **Enter**: Iniciar a partida
 
-### Update 2019
+### Durante a Partida:
+* **Jogador 1 (Paleta Esquerda):** Teclas `W` (Subir) e `S` (Descer) *(no modo 1P, as setas também funcionam para P1)*
+* **Jogador 2 (Paleta Direita - Modo 2P):** Teclas `Seta para Cima` e `Seta para Baixo`
+* **ESC:** Sair do jogo
 
-This has been ported from SDL version 1 to work with SDL version 2. Also added is the ability to run the
-executable with the '-f' command line argument to run in fullscreen 
-(will stretch the 640 * 480 image your systems native display resolution)
-
-I will take any feature requests like updating the AI or movement animation if there is any demand. Or 
-just clone the code and do it yourself. Enjoy!
-
-## Controls
-* space bar to start a game
-* arrow keys for movement
-* ESC to exit game
-
-## Images
-![title screen](http://i.imgur.com/radat.png)
-
-![game play](http://i.imgur.com/CZhqp.png)
+## Como Compilar
+Para compilar no Windows com GCC e SDL2:
+```bash
+gcc -DSDL_MAIN_HANDLED pong.c -IE:/msys64/ucrt64/include/SDL2 -LE:/msys64/ucrt64/lib -lSDL2 -o pong.exe
+```
+Ou com `sdl2-config` em Linux:
+```bash
+gcc pong.c `sdl2-config --cflags --libs` -o pong
+```

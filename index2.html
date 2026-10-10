@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PONG MULTIPLAYER — Lobby Online</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+    --bg: #050505;
+    --panel: #0b0b0b;
+    --white: #f5f5f5;
+    --gray: #999;
+    --line: #242424;
+    --green: #00ff88;
+    --cyan: #00eaff;
+    --red: #ff4466;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: Arial, Helvetica, sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================
+   FUNDO ANIMADO
+========================= */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: .07;
+
+    background-image:
+        linear-gradient(#fff 1px, transparent 1px),
+        linear-gradient(90deg, #fff 1px, transparent 1px);
+
+    background-size: 70px 70px;
+
+    animation: gridMove 15s linear infinite;
+}
+
+@keyframes gridMove {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(70px);
+    }
+}
+
+/* =========================
+   NAVBAR
+========================= */
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 7%;
+    background: rgba(0,0,0,.72);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    z-index: 999;
+}
+
+.logo {
+    font-family: Orbitron, sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: 4px;
+}
+
+.logo span {
+    color: var(--green);
+}
+
+.logo small {
+    font-size: 11px;
+    color: var(--cyan);
+    margin-left: 8px;
+    letter-spacing: 2px;
+}
+
+nav a {
+    color: #aaa;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    transition: .3s;
+}
+
+nav a:hover {
+    color: white;
+}
+
+/* =========================
+   MAIN LAYOUT
+========================= */
+main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 110px 20px 50px;
+    position: relative;
+    z-index: 2;
+}
+
+.container {
+    width: 100%;
+    max-width: 950px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* =========================
+   TITULO PRINCIPAL
+========================= */
+.small-title {
+    font-family: Orbitron, sans-serif;
+    color: var(--green);
+    font-size: 13px;
+    letter-spacing: 5px;
+    margin-bottom: 15px;
+}
+
+.main-title {
+    font-family: Orbitron, sans-serif;
+    font-size: clamp(38px, 6vw, 75px);
+    line-height: 1;
+    letter-spacing: 6px;
+    text-shadow:
+        0 0 10px rgba(255,255,255,.3),
+        0 0 35px rgba(0,255,136,.25);
+    margin-bottom: 25px;
+}
+
+.main-title span {
+    color: var(--cyan);
+}
+
+/* =========================
+   BOTÕES E INPUTS
+========================= */
+.btn {
+    display: inline-block;
+    padding: 15px 32px;
+    border: 1px solid #fff;
+    color: white;
+    text-decoration: none;
+    font-family: Orbitron, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    cursor: pointer;
+    background: transparent;
+    transition: .3s;
+}
+
+.btn:hover {
+    background: white;
+    color: black;
+    box-shadow: 0 0 20px rgba(255,255,255,.3);
+}
+
+.btn.green {
+    border-color: var(--green);
+    color: var(--green);
+}
+
+.btn.green:hover {
+    background: var(--green);
+    color: black;
+    box-shadow: 0 0 30px rgba(0,255,136,.35);
+}
+
+.btn.cyan {
+    border-color: var(--cyan);
+    color: var(--cyan);
+}
+
+.btn.cyan:hover {
+    background: var(--cyan);
+    color: black;
+    box-shadow: 0 0 30px rgba(0,234,255,.35);
+}
+
+.btn.red {
+    border-color: var(--red);
+    color: var(--red);
+}
+
+.btn.red:hover {
+    background: var(--red);
+    color: white;
+    box-shadow: 0 0 30px rgba(255,68,102,.35);
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.input-field {
+    width: 100%;
+    max-width: 380px;
+    padding: 15px 20px;
+    background: #0f0f0f;
+    border: 1px solid #282828;
+    color: white;
+    font-family: Orbitron, sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-align: center;
+    outline: none;
+    margin-bottom: 25px;
+    transition: .3s;
+}
+
+.input-field:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 15px rgba(0,255,136,.2);
+}
+
+/* =========================
+   TELA 1: LOBBY INICIAL
+========================= */
+#menuView {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.button-group {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+/* =========================
+   TELA 2: SALA DE JOGO (ROOM)
+========================= */
+#roomView {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* CÓDIGO DA SALA (APENAS HOST) */
+.host-code-banner {
+    background: linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,234,255,0.05));
+    border: 1px solid var(--green);
+    padding: 14px 28px;
+    border-radius: 4px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 0 25px rgba(0,255,136,0.15);
+    animation: fadeIn 0.5s ease;
+}
+
+.host-code-title {
+    font-family: Orbitron, sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: #aaa;
+}
+
+.host-code-value {
+    font-family: Orbitron, sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--green);
+    letter-spacing: 4px;
+    text-shadow: 0 0 12px rgba(0,255,136,0.5);
+}
+
+.btn-copy {
+    background: transparent;
+    border: 1px solid var(--green);
+    color: var(--green);
+    padding: 6px 14px;
+    font-family: Orbitron, sans-serif;
+    font-size: 10px;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.btn-copy:hover {
+    background: var(--green);
+    color: black;
+}
+
+/* QUADRO DO JOGO / JOGADORES */
+.game-room-box {
+    width: 100%;
+    max-width: 850px;
+    height: 420px;
+    background: #000;
+    border: 2px solid #333;
+    box-shadow: 0 0 40px rgba(0,0,0,0.9), inset 0 0 25px rgba(255,255,255,0.02);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 25px;
+    overflow: hidden;
+}
+
+/* LINHA CENTRAL PONG */
+.game-room-box::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 4px;
+    transform: translateX(-50%);
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.25),
+        rgba(255,255,255,0.25) 15px,
+        transparent 15px,
+        transparent 30px
+    );
+}
+
+.room-status-bar {
+    position: relative;
+    z-index: 3;
+    font-family: Orbitron, sans-serif;
+    font-size: 11px;
+    color: #888;
+    letter-spacing: 2px;
+}
+
+/* CONTAINER DOS JOGADORES (HOST E ADVERSÁRIO) */
+.players-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 3;
+    height: 100%;
+}
+
+.player-card {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 25px 20px;
+    background: rgba(15, 15, 15, 0.7);
+    border: 1px solid #222;
+    backdrop-filter: blur(5px);
+    transition: .4s ease;
+}
+
+.player-card.host {
+    border-color: rgba(0, 255, 136, 0.4);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+}
+
+.player-card.guest {
+    border-color: rgba(0, 234, 255, 0.4);
+    box-shadow: 0 0 20px rgba(0, 234, 255, 0.1);
+}
+
+.player-card.waiting {
+    border-color: #333;
+    opacity: 0.6;
+    border-style: dashed;
+}
+
+.player-role {
+    font-family: Orbitron, sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+}
+
+.player-card.host .player-role { color: var(--green); }
+.player-card.guest .player-role { color: var(--cyan); }
+.player-card.waiting .player-role { color: #666; }
+
+.player-name {
+    font-family: Orbitron, sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    word-break: break-all;
+}
+
+.player-status {
+    font-size: 11px;
+    color: #aaa;
+}
+
+.paddle-preview {
+    width: 10px;
+    height: 60px;
+    margin-top: 15px;
+    border-radius: 2px;
+}
+
+.player-card.host .paddle-preview { background: var(--green); box-shadow: 0 0 12px var(--green); }
+.player-card.guest .paddle-preview { background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+.player-card.waiting .paddle-preview { background: #333; }
+
+/* BARRA DE AÇÕES NA SALA */
+.room-controls {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-subtle {
+    background: transparent;
+    border: 1px solid #333;
+    color: #aaa;
+    font-family: Orbitron, sans-serif;
+    font-size: 10px;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.btn-subtle:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+}
+
+/* =========================
+   MODAL DE ENTRAR EM SALA
+========================= */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #0d0d0d;
+    border: 1px solid var(--cyan);
+    padding: 35px 30px;
+    width: 90%;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: 0 0 35px rgba(0,234,255,0.2);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-title {
+    font-family: Orbitron, sans-serif;
+    font-size: 18px;
+    color: var(--cyan);
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================
+   FOOTER
+========================= */
+footer {
+    border-top: 1px solid #181818;
+    padding: 30px 20px;
+    text-align: center;
+    color: #555;
+    font-size: 12px;
+    letter-spacing: 1px;
+    margin-top: auto;
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav>
+    <div class="logo">
+        P<span>O</span>NG <small>ONLINE</small>
+    </div>
+    <a href="index.html">← VOLTAR PARA O SITE</a>
+</nav>
+
+<!-- CONTEÚDO PRINCIPAL -->
+<main>
+    <div class="container">
+
+        <!-- HEADER DA PÁGINA -->
+        <div class="small-title">MODO MULTIPLAYER</div>
+        <h1 class="main-title">PONG <span>ONLINE</span></h1>
+
+        <!-- TELA 1: LOBBY INICIAL (MENU) -->
+        <div id="menuView">
+            <input type="text" id="nicknameInput" class="input-field" placeholder="SEU NICKNAME" value="Player1" maxlength="15">
+
+            <div class="button-group">
+                <button id="btnCreateRoom" class="btn green">CRIAR SALA</button>
+                <button id="btnOpenJoinModal" class="btn cyan">ENTRAR EM SALA</button>
+            </div>
+        </div>
+
+        <!-- TELA 2: SALA DO JOGO (ROOM LOBBY) -->
+        <div id="roomView">
+
+            <!-- CÓDIGO DA SALA (EXIBIDO APENAS PARA O HOST) -->
+            <div id="hostCodeBanner" class="host-code-banner">
+                <span class="host-code-title">CÓDIGO DA SALA:</span>
+                <span id="roomCodeDisplay" class="host-code-value">#00000</span>
+                <button id="btnCopyCode" class="btn-copy">COPIAR</button>
+            </div>
+
+            <!-- TELINHA DE PLAYERS / CAMPO DE JOGO -->
+            <div class="game-room-box">
+                <div class="room-status-bar" id="roomStatusBar">AGUARDANDO CONEXÃO...</div>
+
+                <div class="players-container">
+                    
+                    <!-- PLAYER 1 (HOST - ESQUERDA) -->
+                    <div class="player-card host">
+                        <div class="player-role">HOST (P1)</div>
+                        <div class="player-name" id="hostName">Player1</div>
+                        <div class="player-status" id="hostStatus">PRONTO</div>
+                        <div class="paddle-preview"></div>
+                    </div>
+
+                    <!-- PLAYER 2 (OPONENTE - DIREITA) -->
+                    <div class="player-card waiting" id="guestCard">
+                        <div class="player-role">ADVERSÁRIO (P2)</div>
+                        <div class="player-name" id="guestName">---</div>
+                        <div class="player-status" id="guestStatus">Aguardando...</div>
+                        <div class="paddle-preview"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- CONTROLES DA SALA -->
+            <div class="room-controls">
+                <button id="btnSimulateOpponent" class="btn-subtle">⚡ Simular Entrada de Adversário</button>
+                <button id="btnStartGame" class="btn green" disabled>INICIAR PARTIDA</button>
+                <button id="btnLeaveRoom" class="btn red">SAIR DA SALA</button>
+            </div>
+
+        </div>
+
+    </div>
+</main>
+
+<!-- MODAL DE ENTRAR EM SALA -->
+<div id="joinModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-title">ENTRAR EM SALA</div>
+        <p style="color: #aaa; font-size: 13px; margin-bottom: 20px;">Digite o código de 5 caracteres fornecido pelo Host:</p>
+        
+        <input type="text" id="joinCodeInput" class="input-field" placeholder="#A1B2C" maxlength="6" style="text-transform: uppercase;">
+        
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button id="btnConfirmJoin" class="btn cyan" style="padding: 12px 24px;">ENTRAR</button>
+            <button id="btnCloseJoinModal" class="btn" style="padding: 12px 24px; border-color: #444; color: #aaa;">CANCELAR</button>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    PONG MULTIPLAYER • LOBBY ONLINE SIMULADO
+</footer>
+
+<!-- SCRIPT DE LÓGICA DO LOBBY -->
+<script>
+    // Elementos DOM
+    const menuView = document.getElementById('menuView');
+    const roomView = document.getElementById('roomView');
+    const joinModal = document.getElementById('joinModal');
+
+    const nicknameInput = document.getElementById('nicknameInput');
+    const btnCreateRoom = document.getElementById('btnCreateRoom');
+    const btnOpenJoinModal = document.getElementById('btnOpenJoinModal');
+    
+    const hostCodeBanner = document.getElementById('hostCodeBanner');
+    const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+    const btnCopyCode = document.getElementById('btnCopyCode');
+
+    const hostName = document.getElementById('hostName');
+    const guestName = document.getElementById('guestName');
+    const guestCard = document.getElementById('guestCard');
+    const guestStatus = document.getElementById('guestStatus');
+    const roomStatusBar = document.getElementById('roomStatusBar');
+
+    const btnSimulateOpponent = document.getElementById('btnSimulateOpponent');
+    const btnStartGame = document.getElementById('btnStartGame');
+    const btnLeaveRoom = document.getElementById('btnLeaveRoom');
+
+    const joinCodeInput = document.getElementById('joinCodeInput');
+    const btnConfirmJoin = document.getElementById('btnConfirmJoin');
+    const btnCloseJoinModal = document.getElementById('btnCloseJoinModal');
+
+    // Estado da Sala
+    let currentRoom = {
+        code: '',
+        isHost: false,
+        hostNick: '',
+        guestNick: null
+    };
+
+    // Gerador de código aleatório de 5 caracteres iniciando com # (Ex: #X9K2L)
+    function generateRoomCode() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let result = '#';
+        for (let i = 0; i < 5; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    // Ação: Criar Sala (Host)
+    btnCreateRoom.addEventListener('click', () => {
+        const nick = nicknameInput.value.trim() || 'Player1';
+        const code = generateRoomCode();
+
+        currentRoom = {
+            code: code,
+            isHost: true,
+            hostNick: nick,
+            guestNick: null
+        };
+
+        openRoomScreen();
+    });
+
+    // Ação: Abrir Modal de Entrar em Sala
+    btnOpenJoinModal.addEventListener('click', () => {
+        joinCodeInput.value = '#';
+        joinModal.style.display = 'flex';
+        joinCodeInput.focus();
+    });
+
+    // Formatar código no input para sempre ter # no início
+    joinCodeInput.addEventListener('input', (e) => {
+        let val = e.target.value.toUpperCase();
+        if (!val.startsWith('#')) {
+            val = '#' + val.replace(/#/g, '');
+        }
+        e.target.value = val;
+    });
+
+    // Ação: Confirmar Entrada na Sala (Guest / Cliente)
+    btnConfirmJoin.addEventListener('click', () => {
+        const codeEntered = joinCodeInput.value.trim();
+        if (codeEntered.length < 6) {
+            alert('Por favor, digite um código válido de 5 caracteres com # no início! (Ex: #A7X92)');
+            return;
+        }
+
+        const nick = nicknameInput.value.trim() || 'Player2';
+
+        currentRoom = {
+            code: codeEntered,
+            isHost: false, // Não é o Host!
+            hostNick: 'Host_Master', // Nome simulado do host
+            guestNick: nick
+        };
+
+        joinModal.style.display = 'none';
+        openRoomScreen();
+    });
+
+    btnCloseJoinModal.addEventListener('click', () => {
+        joinModal.style.display = 'none';
+    });
+
+    // Renderizar Tela da Sala
+    function openRoomScreen() {
+        menuView.style.display = 'none';
+        roomView.style.display = 'flex';
+
+        if (currentRoom.isHost) {
+            // Se for HOST: Exibe o código da sala no topo
+            hostCodeBanner.style.display = 'flex';
+            roomCodeDisplay.textContent = currentRoom.code;
+
+            hostName.textContent = currentRoom.hostNick;
+            guestName.textContent = '---';
+            guestCard.className = 'player-card waiting';
+            guestStatus.textContent = 'Aguardando...';
+            roomStatusBar.textContent = 'SALAS CRIADA • AGUARDANDO OPONENTE CONECTAR';
+
+            btnSimulateOpponent.style.display = 'inline-block';
+            btnStartGame.style.display = 'inline-block';
+            btnStartGame.disabled = true;
+        } else {
+            // Se for GUEST: NÃO EXIBE O CÓDIGO DA SALA
+            hostCodeBanner.style.display = 'none';
+
+            hostName.textContent = currentRoom.hostNick;
+            guestName.textContent = currentRoom.guestNick;
+            guestCard.className = 'player-card guest';
+            guestStatus.textContent = 'CONECTADO';
+            roomStatusBar.textContent = 'CONECTADO À SALA • AGUARDANDO HOST INICIAR A PARTIDA';
+
+            btnSimulateOpponent.style.display = 'none';
+            btnStartGame.style.display = 'none';
+        }
+    }
+
+    // Copiar código da sala
+    btnCopyCode.addEventListener('click', () => {
+        navigator.clipboard.writeText(currentRoom.code).then(() => {
+            btnCopyCode.textContent = 'COPIADO!';
+            setTimeout(() => { btnCopyCode.textContent = 'COPIAR'; }, 2000);
+        });
+    });
+
+    // Simular entrada de adversário (Para o Host testar)
+    btnSimulateOpponent.addEventListener('click', () => {
+        if (!currentRoom.guestNick) {
+            currentRoom.guestNick = 'Oponente_Rival';
+            guestName.textContent = currentRoom.guestNick;
+            guestCard.className = 'player-card guest';
+            guestStatus.textContent = 'PRONTO';
+            roomStatusBar.textContent = 'AMBOS OS JOGADORES CONECTADOS!';
+            btnStartGame.disabled = false;
+            btnSimulateOpponent.textContent = '❌ Remover Adversário';
+        } else {
+            currentRoom.guestNick = null;
+            guestName.textContent = '---';
+            guestCard.className = 'player-card waiting';
+            guestStatus.textContent = 'Aguardando...';
+            roomStatusBar.textContent = 'AGUARDANDO OPONENTE CONECTAR';
+            btnStartGame.disabled = true;
+            btnSimulateOpponent.textContent = '⚡ Simular Entrada de Adversário';
+        }
+    });
+
+    // Botão Iniciar Partida
+    btnStartGame.addEventListener('click', () => {
+        alert('Partida Online iniciada! (O motor do jogo online será conectado aqui)');
+    });
+
+    // Sair da Sala
+    btnLeaveRoom.addEventListener('click', () => {
+        roomView.style.display = 'none';
+        menuView.style.display = 'flex';
+    });
+</script>
+
+</body>
+</html>
