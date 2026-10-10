@@ -253,6 +253,19 @@ nav a:hover {
         0 0 30px rgba(0,255,136,.35);
 }
 
+.btn.cyan {
+    border-color: var(--cyan);
+    color: var(--cyan);
+}
+
+.btn.cyan:hover {
+    background: var(--cyan);
+    color: black;
+
+    box-shadow:
+        0 0 30px rgba(0,234,255,.35);
+}
+
 /* =========================
    SECTIONS
 ========================= */
@@ -702,7 +715,7 @@ footer {
         <li><a href="#curiosidades">CURIOSIDADES</a></li>
         <li><a href="#timeline">LINHA DO TEMPO</a></li>
         <li><a href="#jogo">JOGAR</a></li>
-        <li><a href="index2.html" style="color: var(--cyan);">MULTIPLAYER</a></li>
+        <li><a href="online.html" style="color: var(--cyan);">MULTIPLAYER</a></li>
         <li><a href="pong-game.zip" download>BAIXAR JOGO (.ZIP)</a></li>
     </ul>
 
@@ -1077,6 +1090,37 @@ footer {
 
 
 <!-- =========================
+     MODO ONLINE
+========================= -->
+
+<section id="online" style="text-align: center; padding: 60px 20px;">
+
+    <div class="reveal">
+
+        <div class="eyebrow" style="color: var(--cyan);">
+            LOBBY MULTIPLAYER
+        </div>
+
+        <h2 class="section-title" style="margin-bottom: 25px;">
+            JOGAR ONLINE
+        </h2>
+
+        <div class="section-line" style="margin: 0 auto 30px auto; background: var(--cyan); box-shadow: 0 0 15px rgba(0,234,255,.4);"></div>
+
+        <p class="text" style="margin: 0 auto 25px auto; max-width: 650px; font-size: 16px;">
+            Desafie outros jogadores em tempo real no modo multiplayer online. Crie salas ou entre em partidas existentes diretamente no seu navegador.
+        </p>
+
+        <a href="online.html" class="btn cyan" style="font-size: 14px; padding: 18px 36px; display: inline-block;">
+            Jogue Online
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
      DOWNLOAD .ZIP
 ========================= -->
 
@@ -1116,12 +1160,6 @@ footer {
 ========================= -->
 
 <footer>
-
-    <div style="margin-bottom: 20px;">
-        <a href="pong-game.zip" download style="color: var(--green); text-decoration: none; font-weight: bold; font-family: Orbitron, sans-serif; font-size: 14px; transition: .3s;">
-            Clique aqui para testar o jogo (Baixar .zip com pasta completa)
-        </a>
-    </div>
 
     PONG — UMA VIAGEM PELA HISTÓRIA DOS VIDEOGAMES
 
